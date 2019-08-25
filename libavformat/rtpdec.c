@@ -634,7 +634,11 @@ static int rtp_parse_packet_internal(RTPDemuxContext *s, AVPacket *pkt,
     uint32_t timestamp;
     int rv = 0;
 
-    csrc         = buf[0] & 0x0f;
+    /*invoke dump_rtp_packet func*/
+    if(s->dump_rtp_packet)
+		s->dump_rtp_packet(buf, len);
+	
+	csrc         = buf[0] & 0x0f;
     ext          = buf[0] & 0x10;
     payload_type = buf[1] & 0x7f;
     if (buf[1] & 0x80)

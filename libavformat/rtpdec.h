@@ -189,6 +189,7 @@ struct RTPDemuxContext {
     /* dynamic payload stuff */
     const RTPDynamicProtocolHandler *handler;
     PayloadContext *dynamic_protocol_context;
+	void (*dump_rtp_packet)( const uint8_t *buf, int len);
 };
 
 /**

@@ -2141,12 +2141,20 @@ int ff_rtsp_fetch_packet(AVFormatContext *s, AVPacket *pkt)
     int ret, len;
     RTSPStream *rtsp_st, *first_queue_st = NULL;
     int64_t wait_end = 0;
-
+    RTPDemuxContext *temp_rtp_demux_ctx = NULL;
+	
     if (rt->nb_byes == rt->nb_rtsp_streams)
         return AVERROR_EOF;
 
     /* get next frames from the same RTP packet */
     if (rt->cur_transport_priv) {
+
+        /*set dump_rtp_packet func to RTPDemuxContext*/
+	    temp_rtp_demux_ctx = rt->cur_transport_priv;
+		temp_rtp_demux_ctx->dump_rtp_packet = s->dump_rtp_packet;
+	    rt->cur_transport_priv = temp_rtp_demux_ctx;
+
+		
         if (rt->transport == RTSP_TRANSPORT_RDT) {
             ret = ff_rdt_parse_packet(rt->cur_transport_priv, pkt, NULL, 0);
         } else if (rt->transport == RTSP_TRANSPORT_RTP) {
@@ -2200,6 +2208,14 @@ redo:
     }
 
     len = read_packet(s, &rtsp_st, first_queue_st, wait_end);
+
+	/*set dump_rtp_packet func to RTPDemuxContext*/
+    if(rtsp_st->transport_priv){
+	    temp_rtp_demux_ctx =rtsp_st->transport_priv;
+		temp_rtp_demux_ctx->dump_rtp_packet = s->dump_rtp_packet;
+	    rtsp_st->transport_priv = temp_rtp_demux_ctx;
+    }
+	
     if (len == AVERROR(EAGAIN) && first_queue_st &&
         rt->transport == RTSP_TRANSPORT_RTP) {
         av_log(s, AV_LOG_WARNING,

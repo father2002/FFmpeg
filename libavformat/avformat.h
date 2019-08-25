@@ -1951,6 +1951,11 @@ typedef struct AVFormatContext {
      * - decoding: set by user
      */
     int skip_estimate_duration_from_pts;
+
+    /**
+    * Dump rtp packet for user
+	*/
+	void (*dump_rtp_packet)( const uint8_t *buf, int len);
 } AVFormatContext;
 
 #if FF_API_FORMAT_GET_SET
